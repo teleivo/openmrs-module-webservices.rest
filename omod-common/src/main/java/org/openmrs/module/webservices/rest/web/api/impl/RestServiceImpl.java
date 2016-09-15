@@ -41,6 +41,7 @@ import org.openmrs.module.webservices.rest.web.resource.api.SearchHandler;
 import org.openmrs.module.webservices.rest.web.resource.api.SearchQuery;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingResourceHandler;
 import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingSubclassHandler;
+import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingSubclassSearchHandler;
 import org.openmrs.module.webservices.rest.web.response.InvalidSearchException;
 import org.openmrs.util.OpenmrsConstants;
 
@@ -56,6 +57,8 @@ public class RestServiceImpl implements RestService {
 	private volatile Map<SearchHandlerParameterKey, Set<SearchHandler>> searchHandlersByParameter;
 	
 	private volatile Map<SearchHandlerIdKey, SearchHandler> searchHandlersByIds;
+	
+	private volatile Map<SearchHandlerSubclassTypeKey, Set<SearchHandler>> searchHandlersBySubclass;
 	
 	private volatile Map<String, Set<SearchHandler>> searchHandlersByResource;
 	
@@ -169,18 +172,18 @@ public class RestServiceImpl implements RestService {
 		}
 		
 	}
-
+	
 	private static class SearchHandlerSubclassTypeKey {
-
+		
 		public String supportedResource;
-
+		
 		public String subclassTypename;
-
+		
 		public SearchHandlerSubclassTypeKey(String supportedResource, String subclassTypename) {
 			this.supportedResource = supportedResource;
 			this.subclassTypename = subclassTypename;
 		}
-
+		
 		@Override
 		public int hashCode() {
 			final int prime = 31;
@@ -189,7 +192,7 @@ public class RestServiceImpl implements RestService {
 			result = prime * result + ((supportedResource == null) ? 0 : supportedResource.hashCode());
 			return result;
 		}
-
+		
 		@Override
 		public boolean equals(Object obj) {
 			if (this == obj)
@@ -211,9 +214,9 @@ public class RestServiceImpl implements RestService {
 				return false;
 			return true;
 		}
-
+		
 	}
-
+	
 	/**
 	 * It should be used in TESTS ONLY.
 	 * 
@@ -226,8 +229,11 @@ public class RestServiceImpl implements RestService {
 		if (searchHandlersByParameter == null) {
 			searchHandlersByParameter = new HashMap<SearchHandlerParameterKey, Set<SearchHandler>>();
 		}
+		if (searchHandlersBySubclass == null) {
+			searchHandlersBySubclass = new HashMap<SearchHandlerSubclassTypeKey, Set<SearchHandler>>();
+		}
 		
-		addSupportedSearchHandler(searchHandlersByIds, searchHandlersByParameter, searchHandler);
+		addSupportedSearchHandler(searchHandlersByIds, searchHandlersByParameter, searchHandlersBySubclass, searchHandler);
 	}
 	
 	private void initializeResources() {
@@ -348,31 +354,36 @@ public class RestServiceImpl implements RestService {
 		Map<SearchHandlerIdKey, SearchHandler> tempSearchHandlersByIds = new HashMap<RestServiceImpl.SearchHandlerIdKey, SearchHandler>();
 		Map<SearchHandlerParameterKey, Set<SearchHandler>> tempSearchHandlersByParameters = new HashMap<SearchHandlerParameterKey, Set<SearchHandler>>();
 		Map<String, Set<SearchHandler>> tempSearchHandlersByResource = new HashMap<String, Set<SearchHandler>>();
+		Map<SearchHandlerSubclassTypeKey, Set<SearchHandler>> tempSearchHandlersBySubclass = new HashMap<SearchHandlerSubclassTypeKey, Set<SearchHandler>>();
 		
 		List<SearchHandler> allSearchHandlers = Context.getRegisteredComponents(SearchHandler.class);
 		for (SearchHandler searchHandler : allSearchHandlers) {
 			addSearchHandler(tempSearchHandlersByIds, tempSearchHandlersByParameters, tempSearchHandlersByResource,
-			    searchHandler);
+			    tempSearchHandlersBySubclass, searchHandler);
 		}
 		this.allSearchHandlers = allSearchHandlers;
 		searchHandlersByParameter = tempSearchHandlersByParameters;
 		searchHandlersByIds = tempSearchHandlersByIds;
+		searchHandlersBySubclass = tempSearchHandlersBySubclass;
 		searchHandlersByResource = tempSearchHandlersByResource;
 	}
 	
 	private void addSearchHandler(Map<SearchHandlerIdKey, SearchHandler> tempSearchHandlersByIds,
 	        Map<SearchHandlerParameterKey, Set<SearchHandler>> tempSearchHandlersByParameters,
-	        Map<String, Set<SearchHandler>> tempSearchHandlersByResource, SearchHandler searchHandler) {
+	        Map<String, Set<SearchHandler>> tempSearchHandlersByResource,
+	        Map<SearchHandlerSubclassTypeKey, Set<SearchHandler>> tempSearchHandlersBySubclass, SearchHandler searchHandler) {
 		for (String supportedVersion : searchHandler.getSearchConfig().getSupportedOpenmrsVersions()) {
 			if (ModuleUtil.matchRequiredVersions(OpenmrsConstants.OPENMRS_VERSION_SHORT, supportedVersion)) {
-				addSupportedSearchHandler(tempSearchHandlersByIds, tempSearchHandlersByParameters, searchHandler);
+				addSupportedSearchHandler(tempSearchHandlersByIds, tempSearchHandlersByParameters,
+				    tempSearchHandlersBySubclass, searchHandler);
 				addSearchHandlerToResourceMap(tempSearchHandlersByResource, searchHandler);
 			}
 		}
 	}
 	
 	private void addSupportedSearchHandler(Map<SearchHandlerIdKey, SearchHandler> tempSearchHandlersByIds,
-	        Map<SearchHandlerParameterKey, Set<SearchHandler>> tempSearchHandlersByParameters, SearchHandler searchHandler) {
+	        Map<SearchHandlerParameterKey, Set<SearchHandler>> tempSearchHandlersByParameters,
+	        Map<SearchHandlerSubclassTypeKey, Set<SearchHandler>> tempSearchHandlersBySubclass, SearchHandler searchHandler) {
 		SearchHandlerIdKey searchHanlderIdKey = new SearchHandlerIdKey(searchHandler);
 		SearchHandler previousSearchHandler = tempSearchHandlersByIds.put(searchHanlderIdKey, searchHandler);
 		if (previousSearchHandler != null) {
@@ -383,6 +394,7 @@ public class RestServiceImpl implements RestService {
 		}
 		
 		addSearchHandlerToParametersMap(tempSearchHandlersByParameters, searchHandler);
+		addSearchHandlerToSubclassMap(tempSearchHandlersBySubclass, searchHandler);
 	}
 	
 	private void addSearchHandlerToParametersMap(
@@ -401,6 +413,23 @@ public class RestServiceImpl implements RestService {
 				}
 				list.add(searchHandler);
 			}
+		}
+	}
+	
+	private void addSearchHandlerToSubclassMap(
+	        Map<SearchHandlerSubclassTypeKey, Set<SearchHandler>> tempSearchHandlersBySubclass, SearchHandler searchHandler) {
+		
+		if (searchHandler instanceof DelegatingSubclassSearchHandler) {
+			
+			SearchHandlerSubclassTypeKey subclassKey = new SearchHandlerSubclassTypeKey(searchHandler.getSearchConfig()
+			        .getSupportedResource(), ((DelegatingSubclassSearchHandler) searchHandler)
+			        .getDelegatingSubclassHandler().getTypeName());
+			Set<SearchHandler> searchHandlers = tempSearchHandlersBySubclass.get(subclassKey);
+			if (searchHandlers == null) {
+				searchHandlers = new HashSet<SearchHandler>();
+				tempSearchHandlersBySubclass.put(subclassKey, searchHandlers);
+			}
+			searchHandlers.add(searchHandler);
 		}
 	}
 	
