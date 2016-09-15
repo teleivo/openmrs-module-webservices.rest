@@ -424,16 +424,17 @@ public class RestServiceImpl implements RestService {
 	        Map<SearchHandlerSubclassTypeKey, Set<SearchHandler>> tempSearchHandlersBySubclass, SearchHandler searchHandler) {
 		
 		if (searchHandler instanceof DelegatingSubclassSearchHandler) {
-			
+
+			System.out.println("yess");
 			SearchHandlerSubclassTypeKey subclassKey = new SearchHandlerSubclassTypeKey(searchHandler.getSearchConfig()
-			        .getSupportedResource(), ((DelegatingSubclassSearchHandler) searchHandler)
-			        .getDelegatingSubclassHandler().getTypeName());
+			        .getSupportedResource(), ((DelegatingSubclassSearchHandler) searchHandler).getTypeName());
 			Set<SearchHandler> searchHandlers = tempSearchHandlersBySubclass.get(subclassKey);
 			if (searchHandlers == null) {
 				searchHandlers = new HashSet<SearchHandler>();
 				tempSearchHandlersBySubclass.put(subclassKey, searchHandlers);
 			}
 			searchHandlers.add(searchHandler);
+			System.out.println(searchHandlers.size());
 		}
 	}
 	
@@ -558,7 +559,11 @@ public class RestServiceImpl implements RestService {
 		String[] values = parameters.get(RestConstants.REQUEST_PROPERTY_FOR_TYPE);
 		if (values != null && values.length > 0) {
 			log.info("Parameter t specified");
+			System.out.println("Parameter t specified");
 			log.info("Values given: " + values);
+			System.out.println("Values given: " + values);
+			System.out.println("Values given: " + values[0]);
+			System.out.println("resourceName given: " + resourceName);
 			Set<SearchHandler> searchHandlers = searchHandlersBySubclass.get(new SearchHandlerSubclassTypeKey(resourceName,
 			        values[0]));
 			if (searchHandlers != null && searchHandlers.size() > 0) {

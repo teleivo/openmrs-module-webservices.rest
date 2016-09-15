@@ -26,8 +26,8 @@ public class TestOrderSubclassSearchHandler1_10 implements DelegatingSubclassSea
 			new SearchConfig("default", RestConstants.VERSION_1 + "/order", Arrays.asList("2.0.*"), searchQuery);
 
 	@Override
-	public Class<TestOrderSubclassHandler1_10> getDelegatingSubclassHandler() {
-		return TestOrderSubclassHandler1_10.class;
+	public String getTypeName() {
+		return "testorder";
 	}
 
 	@Override

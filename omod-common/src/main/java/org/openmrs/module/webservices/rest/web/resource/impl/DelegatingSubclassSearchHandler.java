@@ -9,11 +9,5 @@ import org.openmrs.module.webservices.rest.web.resource.api.SearchHandler;
  */
 public interface DelegatingSubclassSearchHandler<T extends DelegatingSubclassHandler> extends SearchHandler {
 	
-	/**
-	 * Convenience method that lets you retrieve the declared {@code DelegatingSubclassHandler} at
-	 * runtime without needing to use introspection yourself.
-	 * 
-	 * @return the delegating subclass handler for which the search handler is written
-	 */
-	Class<T> getDelegatingSubclassHandler();
+	String getTypeName();
 }

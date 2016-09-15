@@ -233,9 +233,7 @@ public class RestServiceImplTest {
 			throws Exception {
 
 		DelegatingSubclassSearchHandler searchHandler = mock(DelegatingSubclassSearchHandler.class);
-		DelegatingSubclassHandler subclassHandler = mock(DelegatingSubclassHandler.class);
-		when(searchHandler.getDelegatingSubclassHandler()).thenReturn(subclassHandler.getClass());
-		when(subclassHandler.getTypeName()).thenReturn("testorder");
+		when(searchHandler.getTypeName()).thenReturn("testorder");
 
 		SearchConfig searchConfig = new SearchConfig("default", "order", "1.10.*", new SearchQuery.Builder(
 				"Enables search for subclass TestOrder").withRequiredParameters("patient").build());
