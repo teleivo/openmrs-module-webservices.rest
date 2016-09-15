@@ -169,7 +169,51 @@ public class RestServiceImpl implements RestService {
 		}
 		
 	}
-	
+
+	private static class SearchHandlerSubclassTypeKey {
+
+		public String supportedResource;
+
+		public String subclassTypename;
+
+		public SearchHandlerSubclassTypeKey(String supportedResource, String subclassTypename) {
+			this.supportedResource = supportedResource;
+			this.subclassTypename = subclassTypename;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((subclassTypename == null) ? 0 : subclassTypename.hashCode());
+			result = prime * result + ((supportedResource == null) ? 0 : supportedResource.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			SearchHandlerSubclassTypeKey other = (SearchHandlerSubclassTypeKey) obj;
+			if (subclassTypename == null) {
+				if (other.subclassTypename != null)
+					return false;
+			} else if (!subclassTypename.equals(other.subclassTypename))
+				return false;
+			if (supportedResource == null) {
+				if (other.supportedResource != null)
+					return false;
+			} else if (!supportedResource.equals(other.supportedResource))
+				return false;
+			return true;
+		}
+
+	}
+
 	/**
 	 * It should be used in TESTS ONLY.
 	 * 
