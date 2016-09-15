@@ -24,6 +24,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.proxy.HibernateProxy;
 import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
@@ -49,6 +51,8 @@ import org.openmrs.util.OpenmrsConstants;
  * Default implementation of the {@link RestService}
  */
 public class RestServiceImpl implements RestService {
+	
+	public static Log log = LogFactory.getLog(RestServiceImpl.class);
 	
 	volatile Map<String, ResourceDefinition> resourceDefinitionsByNames;
 	
@@ -531,6 +535,7 @@ public class RestServiceImpl implements RestService {
 	 * @should return handler by id if exists
 	 * @should throw ambiguous exception if case 1
 	 * @should return handler if case 2
+	 * @should return delegating subclass search handler matching type name if type parameter specified
 	 */
 	@Override
 	public SearchHandler getSearchHandler(String resourceName, Map<String, String[]> parameters) throws APIException {
@@ -548,6 +553,25 @@ public class RestServiceImpl implements RestService {
 		}
 		
 		Set<String> searchParameters = new HashSet<String>(parameters.keySet());
+		
+		// TODO if parameter "t" is specified, look up a SearchHandler in
+		String[] values = parameters.get(RestConstants.REQUEST_PROPERTY_FOR_TYPE);
+		if (values != null && values.length > 0) {
+			log.info("Parameter t specified");
+			log.info("Values given: " + values);
+			Set<SearchHandler> searchHandlers = searchHandlersBySubclass.get(new SearchHandlerSubclassTypeKey(resourceName,
+			        values[0]));
+			if (searchHandlers != null && searchHandlers.size() > 0) {
+				log.info("SearchHandler found for value: " + values[0]);
+				log.info("# " + searchHandlers.size() + " SearchHandlers");
+				return searchHandlers.iterator().next();
+			} else {
+				log.info("No SearchHandler found for value: " + values[0]);
+			}
+		} else {
+			log.info("Parameter t specified but no values given.");
+		}
+		
 		searchParameters.removeAll(RestConstants.SPECIAL_REQUEST_PARAMETERS);
 		
 		Set<SearchHandler> candidateSearchHandlers = null;

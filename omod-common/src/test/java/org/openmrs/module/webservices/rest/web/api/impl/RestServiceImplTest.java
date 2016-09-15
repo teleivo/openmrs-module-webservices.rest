@@ -1,5 +1,6 @@
 package org.openmrs.module.webservices.rest.web.api.impl;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.openmrs.Patient;
 import org.openmrs.Person;
@@ -8,6 +9,8 @@ import org.openmrs.module.webservices.rest.web.resource.api.Resource;
 import org.openmrs.module.webservices.rest.web.resource.api.SearchConfig;
 import org.openmrs.module.webservices.rest.web.resource.api.SearchHandler;
 import org.openmrs.module.webservices.rest.web.resource.api.SearchQuery;
+import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingSubclassHandler;
+import org.openmrs.module.webservices.rest.web.resource.impl.DelegatingSubclassSearchHandler;
 import org.openmrs.module.webservices.rest.web.response.InvalidSearchException;
 
 import java.util.Arrays;
@@ -220,7 +223,36 @@ public class RestServiceImplTest {
 		SearchHandler searchHandler2 = service.getSearchHandler("nonexistingresource", parameters);
 		assertThat(searchHandler2, nullValue());
 	}
-	
+
+	/**
+	 * @verifies return delegating subclass search handler matching type name if type parameter specified
+	 * @see RestServiceImpl#getSearchHandler(String, Map)
+	 */
+	@Test
+	public void getSearchHandler_shouldReturnDelegatingSubclassSearchHandlerMatchingTypeNameIfTypeParameterSpecified()
+			throws Exception {
+
+		DelegatingSubclassSearchHandler searchHandler = mock(DelegatingSubclassSearchHandler.class);
+		DelegatingSubclassHandler subclassHandler = mock(DelegatingSubclassHandler.class);
+		when(searchHandler.getDelegatingSubclassHandler()).thenReturn(subclassHandler.getClass());
+		when(subclassHandler.getTypeName()).thenReturn("testorder");
+
+		SearchConfig searchConfig = new SearchConfig("default", "order", "1.10.*", new SearchQuery.Builder(
+				"Enables search for subclass TestOrder").withRequiredParameters("patient").build());
+		when(searchHandler.getSearchConfig()).thenReturn(searchConfig);
+
+		RestServiceImpl service = new RestServiceImpl();
+		service.addSupportedSearchHandler(searchHandler);
+
+		RestUtil.disableContext(); //to avoid a Context call
+
+		Map<String, String[]> parameters = new HashMap<String, String[]>();
+		parameters.put("t", new String[] { "testorder" });
+		SearchHandler searchHandler2 = service.getSearchHandler("order", parameters);
+		assertThat(searchHandler2, is((SearchHandler) searchHandler));
+	}
+
+
 	@Test
 	public void getResourceBySupportedClass_shouldReturnTheMostExactMatch() throws Exception {
 		//Given
@@ -242,6 +274,6 @@ public class RestServiceImplTest {
 		//Then
 		assertThat(resource, is(patientResource));
 	}
-	
+
 	public static class ChildPatient extends Patient {};
 }
