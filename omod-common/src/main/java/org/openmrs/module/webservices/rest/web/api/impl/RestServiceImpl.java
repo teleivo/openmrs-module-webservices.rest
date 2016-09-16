@@ -170,22 +170,6 @@ public class RestServiceImpl implements RestService {
 		
 	}
 	
-	/**
-	 * It should be used in TESTS ONLY.
-	 * 
-	 * @param searchHandler
-	 */
-	void addSupportedSearchHandler(SearchHandler searchHandler) {
-		if (searchHandlersByIds == null) {
-			searchHandlersByIds = new HashMap<RestServiceImpl.SearchHandlerIdKey, SearchHandler>();
-		}
-		if (searchHandlersByParameter == null) {
-			searchHandlersByParameter = new HashMap<SearchHandlerParameterKey, Set<SearchHandler>>();
-		}
-		
-		addSupportedSearchHandler(searchHandlersByIds, searchHandlersByParameter, searchHandler);
-	}
-	
 	private void initializeResources() {
 		if (resourceDefinitionsByNames != null) {
 			return;

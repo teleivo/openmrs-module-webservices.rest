@@ -1,5 +1,6 @@
 package org.openmrs.module.webservices.rest.web.api.impl;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Patient;
 import org.openmrs.Person;
@@ -10,6 +11,7 @@ import org.openmrs.module.webservices.rest.web.resource.api.SearchHandler;
 import org.openmrs.module.webservices.rest.web.resource.api.SearchQuery;
 import org.openmrs.module.webservices.rest.web.response.InvalidSearchException;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,7 +27,25 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class RestServiceImplTest {
-	
+
+	private Method addSupportedSearchHandlerMethod;
+
+	@Before
+	public void setUp() throws Exception {
+
+		addSupportedSearchHandlerMethod = RestServiceImpl.class.getDeclaredMethod("addSupportedSearchHandler", new Class[] { Map.class, Map.class, SearchHandler.class});
+
+		if (searchHandlersByIds == null) {
+			searchHandlersByIds = new HashMap<RestServiceImpl.SearchHandlerIdKey, SearchHandler>();
+		}
+		if (searchHandlersByParameter == null) {
+			searchHandlersByParameter = new HashMap<SearchHandlerParameterKey, Set<SearchHandler>>();
+		}
+
+		addSupportedSearchHandlerMethod.invoke(searchHandlersByIds, searchHandlersByParameter, searchHandler);
+	}
+
+
 	/**
 	 * @see RestServiceImpl#getSearchHandler(String,Map)
 	 * @verifies throw exception if no handler with id
