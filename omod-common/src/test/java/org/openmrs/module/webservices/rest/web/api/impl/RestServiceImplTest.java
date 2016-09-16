@@ -10,6 +10,7 @@ import org.openmrs.module.webservices.rest.web.resource.api.SearchConfig;
 import org.openmrs.module.webservices.rest.web.resource.api.SearchHandler;
 import org.openmrs.module.webservices.rest.web.resource.api.SearchQuery;
 import org.openmrs.module.webservices.rest.web.response.InvalidSearchException;
+import org.openmrs.test.BaseContextMockTest;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -26,14 +27,24 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class RestServiceImplTest {
+public class RestServiceImplTest extends BaseContextMockTest {
 
 	private Method addSupportedSearchHandlerMethod;
+
+	private Class searchHandlerIdKeyClass;
+
+	private Class searchHandlerParameterKeyClass;
+
+	private RestServiceImpl restService = new RestServiceImpl();
 
 	@Before
 	public void setUp() throws Exception {
 
-		addSupportedSearchHandlerMethod = RestServiceImpl.class.getDeclaredMethod("addSupportedSearchHandler", new Class[] { Map.class, Map.class, SearchHandler.class});
+/*		addSupportedSearchHandlerMethod = RestServiceImpl.class.getDeclaredMethod("addSupportedSearchHandler", new Class[] { Map.class, Map.class, SearchHandler.class});
+		addSupportedSearchHandlerMethod.setAccessible(true);
+
+		searchHandlerIdKeyClass = Class.forName("org.openmrs.module.webservices.rest.web.api.impl$SearchHandlerIdKey");
+		searchHandlerIdKeyClass.getClass()
 
 		if (searchHandlersByIds == null) {
 			searchHandlersByIds = new HashMap<RestServiceImpl.SearchHandlerIdKey, SearchHandler>();
@@ -42,7 +53,7 @@ public class RestServiceImplTest {
 			searchHandlersByParameter = new HashMap<SearchHandlerParameterKey, Set<SearchHandler>>();
 		}
 
-		addSupportedSearchHandlerMethod.invoke(searchHandlersByIds, searchHandlersByParameter, searchHandler);
+		addSupportedSearchHandlerMethod.invoke(restService, searchHandlersByIds, searchHandlersByParameter, searchHandler);*/
 	}
 
 
