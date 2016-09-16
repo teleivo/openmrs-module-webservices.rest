@@ -424,7 +424,7 @@ public class RestServiceImpl implements RestService {
 	        Map<SearchHandlerSubclassTypeKey, Set<SearchHandler>> tempSearchHandlersBySubclass, SearchHandler searchHandler) {
 		
 		if (searchHandler instanceof DelegatingSubclassSearchHandler) {
-
+			
 			System.out.println("yess");
 			SearchHandlerSubclassTypeKey subclassKey = new SearchHandlerSubclassTypeKey(searchHandler.getSearchConfig()
 			        .getSupportedResource(), ((DelegatingSubclassSearchHandler) searchHandler).getTypeName());
@@ -536,7 +536,8 @@ public class RestServiceImpl implements RestService {
 	 * @should return handler by id if exists
 	 * @should throw ambiguous exception if case 1
 	 * @should return handler if case 2
-	 * @should return delegating subclass search handler matching type name if type parameter specified
+	 * @should return delegating subclass search handler matching type name if type parameter
+	 *         specified
 	 */
 	@Override
 	public SearchHandler getSearchHandler(String resourceName, Map<String, String[]> parameters) throws APIException {
@@ -561,20 +562,20 @@ public class RestServiceImpl implements RestService {
 			log.info("Parameter t specified");
 			System.out.println("Parameter t specified");
 			log.info("Values given: " + values);
-			System.out.println("Values given: " + values);
+			System.out.println("Values given of length: " + values.length);
 			System.out.println("Values given: " + values[0]);
 			System.out.println("resourceName given: " + resourceName);
 			Set<SearchHandler> searchHandlers = searchHandlersBySubclass.get(new SearchHandlerSubclassTypeKey(resourceName,
 			        values[0]));
 			if (searchHandlers != null && searchHandlers.size() > 0) {
-				log.info("SearchHandler found for value: " + values[0]);
-				log.info("# " + searchHandlers.size() + " SearchHandlers");
+				System.out.println("SearchHandler found for value: " + values[0]);
+				System.out.println("# " + searchHandlers.size() + " SearchHandlers");
 				return searchHandlers.iterator().next();
 			} else {
-				log.info("No SearchHandler found for value: " + values[0]);
+				System.out.println("No SearchHandler found for value: " + values[0]);
 			}
 		} else {
-			log.info("Parameter t specified but no values given.");
+			System.out.println("Parameter t specified but no values given.");
 		}
 		
 		searchParameters.removeAll(RestConstants.SPECIAL_REQUEST_PARAMETERS);

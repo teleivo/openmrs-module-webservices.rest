@@ -223,34 +223,34 @@ public class RestServiceImplTest {
 		SearchHandler searchHandler2 = service.getSearchHandler("nonexistingresource", parameters);
 		assertThat(searchHandler2, nullValue());
 	}
-
+	
 	/**
-	 * @verifies return delegating subclass search handler matching type name if type parameter specified
+	 * @verifies return delegating subclass search handler matching type name if type parameter
+	 *           specified
 	 * @see RestServiceImpl#getSearchHandler(String, Map)
 	 */
 	@Test
 	public void getSearchHandler_shouldReturnDelegatingSubclassSearchHandlerMatchingTypeNameIfTypeParameterSpecified()
-			throws Exception {
-
+	        throws Exception {
+		
 		DelegatingSubclassSearchHandler searchHandler = mock(DelegatingSubclassSearchHandler.class);
 		when(searchHandler.getTypeName()).thenReturn("testorder");
-
+		
 		SearchConfig searchConfig = new SearchConfig("default", "order", "1.10.*", new SearchQuery.Builder(
-				"Enables search for subclass TestOrder").withRequiredParameters("patient").build());
+		        "Enables search for subclass TestOrder").withRequiredParameters("patient").build());
 		when(searchHandler.getSearchConfig()).thenReturn(searchConfig);
-
+		
 		RestServiceImpl service = new RestServiceImpl();
 		service.addSupportedSearchHandler(searchHandler);
-
+		
 		RestUtil.disableContext(); //to avoid a Context call
-
+		
 		Map<String, String[]> parameters = new HashMap<String, String[]>();
 		parameters.put("t", new String[] { "testorder" });
 		SearchHandler searchHandler2 = service.getSearchHandler("order", parameters);
 		assertThat(searchHandler2, is((SearchHandler) searchHandler));
 	}
-
-
+	
 	@Test
 	public void getResourceBySupportedClass_shouldReturnTheMostExactMatch() throws Exception {
 		//Given
@@ -272,6 +272,6 @@ public class RestServiceImplTest {
 		//Then
 		assertThat(resource, is(patientResource));
 	}
-
+	
 	public static class ChildPatient extends Patient {};
 }
