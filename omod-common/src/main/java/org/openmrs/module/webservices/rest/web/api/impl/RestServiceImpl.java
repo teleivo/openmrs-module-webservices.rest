@@ -53,13 +53,13 @@ public class RestServiceImpl implements RestService {
 	
 	volatile Map<Class<?>, Resource> resourcesBySupportedClasses;
 	
-	private volatile Map<SearchHandlerParameterKey, Set<SearchHandler>> searchHandlersByParameter;
+	volatile Map<SearchHandlerParameterKey, Set<SearchHandler>> searchHandlersByParameter;
+
+	volatile Map<SearchHandlerIdKey, SearchHandler> searchHandlersByIds;
 	
-	private volatile Map<SearchHandlerIdKey, SearchHandler> searchHandlersByIds;
+	volatile Map<String, Set<SearchHandler>> searchHandlersByResource;
 	
-	private volatile Map<String, Set<SearchHandler>> searchHandlersByResource;
-	
-	private volatile List<SearchHandler> allSearchHandlers;
+	volatile List<SearchHandler> allSearchHandlers;
 	
 	public RestServiceImpl() {
 	}
@@ -291,6 +291,7 @@ public class RestServiceImpl implements RestService {
 		
 		List<SearchHandler> allSearchHandlers = Context.getRegisteredComponents(SearchHandler.class);
 		for (SearchHandler searchHandler : allSearchHandlers) {
+			System.out.println(searchHandler.getSearchConfig().getId());
 			addSearchHandler(tempSearchHandlersByIds, tempSearchHandlersByParameters, tempSearchHandlersByResource,
 			    searchHandler);
 		}
@@ -304,6 +305,7 @@ public class RestServiceImpl implements RestService {
 	        Map<SearchHandlerParameterKey, Set<SearchHandler>> tempSearchHandlersByParameters,
 	        Map<String, Set<SearchHandler>> tempSearchHandlersByResource, SearchHandler searchHandler) {
 		for (String supportedVersion : searchHandler.getSearchConfig().getSupportedOpenmrsVersions()) {
+			System.out.println(OpenmrsConstants.OPENMRS_VERSION_SHORT);
 			if (ModuleUtil.matchRequiredVersions(OpenmrsConstants.OPENMRS_VERSION_SHORT, supportedVersion)) {
 				addSupportedSearchHandler(tempSearchHandlersByIds, tempSearchHandlersByParameters, searchHandler);
 				addSearchHandlerToResourceMap(tempSearchHandlersByResource, searchHandler);

@@ -1,17 +1,24 @@
 package org.openmrs.module.webservices.rest.web.api.impl;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
 import org.openmrs.Patient;
 import org.openmrs.Person;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.webservices.rest.web.RestUtil;
 import org.openmrs.module.webservices.rest.web.resource.api.Resource;
 import org.openmrs.module.webservices.rest.web.resource.api.SearchConfig;
 import org.openmrs.module.webservices.rest.web.resource.api.SearchHandler;
 import org.openmrs.module.webservices.rest.web.resource.api.SearchQuery;
 import org.openmrs.module.webservices.rest.web.response.InvalidSearchException;
+import org.openmrs.util.OpenmrsConstants;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,23 +33,19 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+/**
+ * Tests {@link RestServiceImpl}.
+ */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ Context.class  })
 public class RestServiceImplTest {
 
-	private Method addSupportedSearchHandlerMethod;
+	@Rule
+	public ExpectedException expectedException = ExpectedException.none();
 
 	@Before
 	public void setUp() throws Exception {
-
-		addSupportedSearchHandlerMethod = RestServiceImpl.class.getDeclaredMethod("addSupportedSearchHandler", new Class[] { Map.class, Map.class, SearchHandler.class});
-
-		if (searchHandlersByIds == null) {
-			searchHandlersByIds = new HashMap<RestServiceImpl.SearchHandlerIdKey, SearchHandler>();
-		}
-		if (searchHandlersByParameter == null) {
-			searchHandlersByParameter = new HashMap<SearchHandlerParameterKey, Set<SearchHandler>>();
-		}
-
-		addSupportedSearchHandlerMethod.invoke(searchHandlersByIds, searchHandlersByParameter, searchHandler);
+		PowerMockito.mockStatic(Context.class);
 	}
 
 
@@ -52,22 +55,26 @@ public class RestServiceImplTest {
 	 */
 	@Test
 	public void getSearchHandler_shouldThrowExceptionIfNoHandlerWithId() throws Exception {
+
 		RestServiceImpl service = new RestServiceImpl();
 		
 		SearchHandler searchHandler = mock(SearchHandler.class);
-		SearchConfig searchConfig = new SearchConfig("none", "concept", "1.8.*", new SearchQuery.Builder("Fuzzy search")
+		SearchConfig searchConfig = new SearchConfig("none", "concept", OpenmrsConstants.OPENMRS_VERSION_SHORT, new SearchQuery.Builder("Fuzzy search")
 		        .withRequiredParameters("q").build());
 		when(searchHandler.getSearchConfig()).thenReturn(searchConfig);
-		service.addSupportedSearchHandler(searchHandler);
-		
+		when(Context.getRegisteredComponents(SearchHandler.class)).thenReturn(Arrays.asList( searchHandler ));
+		service.initialize();
+
+		System.out.println(service.resourceDefinitionsByNames.size());
+		System.out.println(service.searchHandlersByIds.size());
+		System.out.println(service.allSearchHandlers.size());
+
 		Map<String, String[]> parameters = new HashMap<String, String[]>();
 		parameters.put("s", new String[] { "conceptByMapping" });
-		
-		try {
-			service.getSearchHandler("concept", parameters);
-			fail();
-		}
-		catch (InvalidSearchException e) {}
+
+		expectedException.expect(InvalidSearchException.class);
+		expectedException.expectMessage("The search with id 'conceptByMapping' for '" + searchConfig.getSupportedResource() + "' resource is not recognized");
+		service.getSearchHandler("concept", parameters);
 	}
 	
 	/**
@@ -76,14 +83,16 @@ public class RestServiceImplTest {
 	 */
 	@Test
 	public void getSearchHandler_shouldReturnHandlerByIdIfExists() throws Exception {
+
 		RestServiceImpl service = new RestServiceImpl();
-		
+
 		SearchHandler searchHandler = mock(SearchHandler.class);
-		SearchConfig searchConfig = new SearchConfig("conceptByMapping", "concept", "1.8.*", new SearchQuery.Builder(
+		SearchConfig searchConfig = new SearchConfig("conceptByMapping", "concept", OpenmrsConstants.OPENMRS_VERSION_SHORT, new SearchQuery.Builder(
 		        "Fuzzy search").withRequiredParameters("q").build());
 		when(searchHandler.getSearchConfig()).thenReturn(searchConfig);
-		service.addSupportedSearchHandler(searchHandler);
-		
+		when(Context.getRegisteredComponents(SearchHandler.class)).thenReturn(Arrays.asList( searchHandler ));
+		service.initialize();
+
 		Map<String, String[]> parameters = new HashMap<String, String[]>();
 		parameters.put("s", new String[] { "conceptByMapping" });
 		SearchHandler searchHandler2 = service.getSearchHandler("concept", parameters);
@@ -102,14 +111,14 @@ public class RestServiceImplTest {
 		SearchConfig searchConfig = new SearchConfig("conceptByMapping", "concept", "1.8.*", new SearchQuery.Builder(
 		        "description").withRequiredParameters("sourceName", "code").build());
 		when(searchHandler.getSearchConfig()).thenReturn(searchConfig);
-		service.addSupportedSearchHandler(searchHandler);
-		
+		when(Context.getRegisteredComponents(SearchHandler.class)).thenReturn(Arrays.asList( searchHandler ));
+
 		SearchHandler searchHandler2 = mock(SearchHandler.class);
 		SearchConfig searchConfig2 = new SearchConfig("conceptByMapping2", "concept", "1.8.*", new SearchQuery.Builder(
 		        "description").withRequiredParameters("sourceName", "code").build());
 		when(searchHandler2.getSearchConfig()).thenReturn(searchConfig2);
-		service.addSupportedSearchHandler(searchHandler2);
-		
+		when(Context.getRegisteredComponents(SearchHandler.class)).thenReturn(Arrays.asList( searchHandler2 ));
+
 		RestUtil.disableContext(); //to avoid a Context call
 		
 		Map<String, String[]> parameters = new HashMap<String, String[]>();
@@ -139,14 +148,14 @@ public class RestServiceImplTest {
 		SearchConfig searchConfig = new SearchConfig("conceptByMapping", "concept", "1.8.*", new SearchQuery.Builder(
 		        "description").withRequiredParameters("sourceName").withOptionalParameters("code").build());
 		when(searchHandler.getSearchConfig()).thenReturn(searchConfig);
-		service.addSupportedSearchHandler(searchHandler);
-		
+		when(Context.getRegisteredComponents(SearchHandler.class)).thenReturn(Arrays.asList( searchHandler ));
+
 		SearchHandler searchHandler2 = mock(SearchHandler.class);
 		SearchConfig searchConfig2 = new SearchConfig("conceptByMapping2", "concept", "1.8.*", new SearchQuery.Builder(
 		        "description").withRequiredParameters("sourceName").build());
 		when(searchHandler2.getSearchConfig()).thenReturn(searchConfig2);
-		service.addSupportedSearchHandler(searchHandler2);
-		
+		when(Context.getRegisteredComponents(SearchHandler.class)).thenReturn(Arrays.asList( searchHandler2 ));
+
 		RestUtil.disableContext(); //to avoid a Context call
 		
 		Map<String, String[]> parameters = new HashMap<String, String[]>();
@@ -169,14 +178,14 @@ public class RestServiceImplTest {
 		SearchConfig searchConfig = new SearchConfig("conceptByMapping", "concept", "1.8.*", new SearchQuery.Builder(
 		        "description").withRequiredParameters("sourceName").withOptionalParameters("code").build());
 		when(searchHandler.getSearchConfig()).thenReturn(searchConfig);
-		service.addSupportedSearchHandler(searchHandler);
-		
+		when(Context.getRegisteredComponents(SearchHandler.class)).thenReturn(Arrays.asList( searchHandler ));
+
 		SearchHandler searchHandler2 = mock(SearchHandler.class);
 		SearchConfig searchConfig2 = new SearchConfig("conceptByMapping2", "concept", "1.8.*", new SearchQuery.Builder(
 		        "description").withRequiredParameters("sourceName").build());
 		when(searchHandler2.getSearchConfig()).thenReturn(searchConfig2);
-		service.addSupportedSearchHandler(searchHandler2);
-		
+		when(Context.getRegisteredComponents(SearchHandler.class)).thenReturn(Arrays.asList( searchHandler2 ));
+
 		RestUtil.disableContext(); //to avoid a Context call
 		
 		Map<String, String[]> parameters = new HashMap<String, String[]>();
@@ -201,14 +210,14 @@ public class RestServiceImplTest {
 		SearchConfig searchConfig = new SearchConfig("conceptByMapping", "concept", "1.8.*", new SearchQuery.Builder(
 		        "description").withRequiredParameters("sourceName").withOptionalParameters("code").build());
 		when(searchHandler.getSearchConfig()).thenReturn(searchConfig);
-		service.addSupportedSearchHandler(searchHandler);
-		
+		when(Context.getRegisteredComponents(SearchHandler.class)).thenReturn(Arrays.asList( searchHandler ));
+
 		SearchHandler searchHandler2 = mock(SearchHandler.class);
 		SearchConfig searchConfig2 = new SearchConfig("conceptByMapping2", "concept", "1.8.*", new SearchQuery.Builder(
 		        "description").withRequiredParameters("sourceName").build());
 		when(searchHandler2.getSearchConfig()).thenReturn(searchConfig2);
-		service.addSupportedSearchHandler(searchHandler2);
-		
+		when(Context.getRegisteredComponents(SearchHandler.class)).thenReturn(Arrays.asList( searchHandler2 ));
+
 		RestUtil.disableContext(); //to avoid a Context call
 		
 		Map<String, String[]> parameters = new HashMap<String, String[]>();
@@ -230,8 +239,8 @@ public class RestServiceImplTest {
 		SearchConfig searchConfig = new SearchConfig("conceptByMapping", "concept", "1.8.*", new SearchQuery.Builder(
 		        "description").withRequiredParameters("sourceName").build());
 		when(searchHandler.getSearchConfig()).thenReturn(searchConfig);
-		service.addSupportedSearchHandler(searchHandler);
-		
+		when(Context.getRegisteredComponents(SearchHandler.class)).thenReturn(Arrays.asList( searchHandler ));
+
 		RestUtil.disableContext(); //to avoid a Context call
 		
 		Map<String, String[]> parameters = new HashMap<String, String[]>();

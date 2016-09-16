@@ -55,12 +55,26 @@
 
 	<dependencyManagement>
 		<dependencies>
+			<!--javassist changed groups/names (javassist -> org.javassist) between versions which is why conflict-->
+			<!--resolution does not kick in. add dependency to org.javassist needed by powermock and exclude dependency to older-->
+			<!--version at openmrs-api-->
+			<dependency>
+				<groupId>org.javassist</groupId>
+				<artifactId>javassist</artifactId>
+				<version>3.19.0-GA</version>
+			</dependency>
 			<dependency>
 				<groupId>org.openmrs.api</groupId>
 				<artifactId>openmrs-api</artifactId>
 				<version>${openmrs.version}</version>
 				<type>jar</type>
 				<scope>provided</scope>
+				<exclusions>
+					<exclusion>
+						<groupId>javassist</groupId>
+						<artifactId>javassist</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 
 			<dependency>
@@ -78,6 +92,12 @@
 				<classifier>tests</classifier>
 				<type>jar</type>
 				<scope>test</scope>
+				<exclusions>
+					<exclusion>
+						<groupId>javassist</groupId>
+						<artifactId>javassist</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 
 			<dependency>
@@ -99,14 +119,6 @@
 					<exclusion>
 						<groupId>org.mockito</groupId>
 						<artifactId>mockito-all</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.powermock</groupId>
-						<artifactId>powermock-module-junit4</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.powermock</groupId>
-						<artifactId>powermock-api-mockito</artifactId>
 					</exclusion>
 					<exclusion>
 						<groupId>org.hamcrest</groupId>
