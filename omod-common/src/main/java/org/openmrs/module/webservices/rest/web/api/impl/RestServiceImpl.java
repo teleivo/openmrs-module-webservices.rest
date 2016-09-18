@@ -76,48 +76,61 @@ public class RestServiceImpl implements RestService {
 		}
 		
 	}
-	
-	private static class CompositeSearchHandlerKey {
-		
-		final public String supportedResource;
-		
-		final public String additionalKeyProperty;
-		
-		public CompositeSearchHandlerKey(String supportedResource, String additionalKeyProperty) {
-			this.supportedResource = supportedResource;
-			this.additionalKeyProperty = additionalKeyProperty;
+
+	private static abstract class AbstractCompositeSearchHandlerKey {
+
+		final public String key1;
+
+		final public String key2;
+
+		private AbstractCompositeSearchHandlerKey(String key1, String key2) {
+			this.key1 = key1;
+			this.key2 = key2;
 		}
-		
+
+		abstract AbstractCompositeSearchHandlerKey create(SearchHandler searchHandler);
+
 		@Override
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
-			result = prime * result + ((additionalKeyProperty == null) ? 0 : additionalKeyProperty.hashCode());
-			result = prime * result + ((supportedResource == null) ? 0 : supportedResource.hashCode());
+			result = prime * result + ((key2 == null) ? 0 : key2.hashCode());
+			result = prime * result + ((key1 == null) ? 0 : key1.hashCode());
 			return result;
 		}
-		
+
 		@Override
 		public boolean equals(Object obj) {
 			if (this == obj)
 				return true;
-			if (!(obj instanceof CompositeSearchHandlerKey))
+			if (!(obj instanceof AbstractCompositeSearchHandlerKey))
 				return false;
-			CompositeSearchHandlerKey other = (CompositeSearchHandlerKey) obj;
-			if (additionalKeyProperty == null) {
-				if (other.additionalKeyProperty != null)
+			AbstractCompositeSearchHandlerKey other = (AbstractCompositeSearchHandlerKey) obj;
+			if (key2 == null) {
+				if (other.key2 != null)
 					return false;
-			} else if (!additionalKeyProperty.equals(other.additionalKeyProperty))
+			} else if (!key2.equals(other.key2))
 				return false;
-			if (supportedResource == null) {
-				if (other.supportedResource != null)
+			if (key1 == null) {
+				if (other.key1 != null)
 					return false;
-			} else if (!supportedResource.equals(other.supportedResource))
+			} else if (!key1.equals(other.key1))
 				return false;
 			return true;
 		}
 	}
-	
+
+	private static class CompositeSearchHandlerKey extends AbstractCompositeSearchHandlerKey {
+
+		private CompositeSearchHandlerKey(SearchHandler searchHandler){
+			super(searchHandler.getSearchConfig().getSupportedResource(), searchHandler.getSearchConfig().getId());
+		}
+		@Override
+		AbstractCompositeSearchHandlerKey create(SearchHandler searchHandler) {
+			return new CompositeSearchHandlerKey(searchHandler);
+		}
+	}
+
 	/**
 	 * It should be used in TESTS ONLY.
 	 * 
