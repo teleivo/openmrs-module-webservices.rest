@@ -87,7 +87,7 @@ public class RestServiceImpl implements RestService {
 		
 	}
 	
-	private static class CompositeSearchHandlerKey {
+	public static class CompositeSearchHandlerKey {
 		
 		final public String supportedResource;
 		
@@ -97,7 +97,13 @@ public class RestServiceImpl implements RestService {
 			this.supportedResource = supportedResource;
 			this.additionalKeyProperty = additionalKeyProperty;
 		}
-		
+
+		/**
+		 * @see Object#hashCode()
+		 *
+		 * @return the has code
+		 * @should return same hashcode for equal composite keys
+		 */
 		@Override
 		public int hashCode() {
 			final int prime = 31;
@@ -106,7 +112,20 @@ public class RestServiceImpl implements RestService {
 			result = prime * result + ((supportedResource == null) ? 0 : supportedResource.hashCode());
 			return result;
 		}
-		
+
+		/**
+		 * @see Object#equals(Object)
+		 *
+		 * @param obj the object to test for if equal to this
+		 * @return true if obj is equal to this otherwise false
+		 * @should return true if given this
+		 * @should be symmetric
+		 * @should be transitive
+		 * @should return false if given null
+		 * @should return false if given an object which is not an instanceof this class
+		 * @should return false if given a composite key with different supported resource
+		 * @should return false if given a composite key with different additional key
+		 */
 		@Override
 		public boolean equals(Object obj) {
 			if (this == obj)
