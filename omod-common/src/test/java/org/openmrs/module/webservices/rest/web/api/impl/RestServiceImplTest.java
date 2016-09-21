@@ -27,6 +27,7 @@ import org.openmrs.module.webservices.rest.web.response.InvalidSearchException;
 import org.openmrs.test.BaseContextMockTest;
 import org.openmrs.util.OpenmrsConstants;
 
+import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -273,14 +274,16 @@ public class RestServiceImplTest extends BaseContextMockTest {
 	
 	/**
 	 * @verifies return same hashcode for equal composite keys
-	 * @see CompositeSearchHandlerKey#hashCode()
+	 * @see RestServiceImpl.CompositeSearchHandlerKey#hashCode()
 	 */
 	@Test
 	public void hashCode_shouldReturnSameHashcodeForEqualCompositeKeys() throws Exception {
-		RestServiceImpl.CompositeSearchHandlerKey compositeKey1 = new RestServiceImpl.CompositeSearchHandlerKey("v1/order",
-		        "default");
-		RestServiceImpl.CompositeSearchHandlerKey compositeKey2 = new RestServiceImpl.CompositeSearchHandlerKey("v1/order",
-		        "default");
+		Class compositeSearchHandlerClass = Class
+		        .forName("org.openmrs.module.webservices.rest.web.api.impl.RestServiceImpl$CompositeSearchHandlerKey");
+		Constructor ctor = compositeSearchHandlerClass.getDeclaredConstructors()[0];
+		
+		Object compositeKey1 = ctor.newInstance("v1/order", "default");
+		Object compositeKey2 = ctor.newInstance("v1/order", "default");
 		assertTrue(compositeKey1.equals(compositeKey2));
 		
 		assertThat(compositeKey1.hashCode(), is(compositeKey2.hashCode()));
@@ -288,41 +291,47 @@ public class RestServiceImplTest extends BaseContextMockTest {
 	
 	/**
 	 * @verifies return true if given this
-	 * @see CompositeSearchHandlerKey#equals(Object)
+	 * @see RestServiceImpl.CompositeSearchHandlerKey#equals(Object)
 	 */
 	@Test
 	public void equals_shouldReturnTrueIfGivenThis() throws Exception {
-		RestServiceImpl.CompositeSearchHandlerKey compositeKey = new RestServiceImpl.CompositeSearchHandlerKey("v1/order",
-		        "default");
-		assertTrue(compositeKey.equals(compositeKey));
+		Class compositeSearchHandlerClass = Class
+		        .forName("org.openmrs.module.webservices.rest.web.api.impl.RestServiceImpl$CompositeSearchHandlerKey");
+		Constructor ctor = compositeSearchHandlerClass.getDeclaredConstructors()[0];
+		
+		Object compositeKey1 = ctor.newInstance("v1/order", "default");
+		assertTrue(compositeKey1.equals(compositeKey1));
 	}
 	
 	/**
 	 * @verifies be symmetric
-	 * @see CompositeSearchHandlerKey#equals(Object)
+	 * @see RestServiceImpl.CompositeSearchHandlerKey#equals(Object)
 	 */
 	@Test
 	public void equals_shouldBeSymmetric() throws Exception {
-		RestServiceImpl.CompositeSearchHandlerKey compositeKey1 = new RestServiceImpl.CompositeSearchHandlerKey("v1/order",
-		        "default");
-		RestServiceImpl.CompositeSearchHandlerKey compositeKey2 = new RestServiceImpl.CompositeSearchHandlerKey("v1/order",
-		        "default");
+		Class compositeSearchHandlerClass = Class
+		        .forName("org.openmrs.module.webservices.rest.web.api.impl.RestServiceImpl$CompositeSearchHandlerKey");
+		Constructor ctor = compositeSearchHandlerClass.getDeclaredConstructors()[0];
+		
+		Object compositeKey1 = ctor.newInstance("v1/order", "default");
+		Object compositeKey2 = ctor.newInstance("v1/order", "default");
 		assertTrue(compositeKey1.equals(compositeKey2));
 		assertTrue(compositeKey2.equals(compositeKey1));
 	}
 	
 	/**
 	 * @verifies be transitive
-	 * @see CompositeSearchHandlerKey#equals(Object)
+	 * @see RestServiceImpl.CompositeSearchHandlerKey#equals(Object)
 	 */
 	@Test
 	public void equals_shouldBeTransitive() throws Exception {
-		RestServiceImpl.CompositeSearchHandlerKey compositeKey1 = new RestServiceImpl.CompositeSearchHandlerKey("v1/order",
-		        "default");
-		RestServiceImpl.CompositeSearchHandlerKey compositeKey2 = new RestServiceImpl.CompositeSearchHandlerKey("v1/order",
-		        "default");
-		RestServiceImpl.CompositeSearchHandlerKey compositeKey3 = new RestServiceImpl.CompositeSearchHandlerKey("v1/order",
-		        "default");
+		Class compositeSearchHandlerClass = Class
+		        .forName("org.openmrs.module.webservices.rest.web.api.impl.RestServiceImpl$CompositeSearchHandlerKey");
+		Constructor ctor = compositeSearchHandlerClass.getDeclaredConstructors()[0];
+		
+		Object compositeKey1 = ctor.newInstance("v1/order", "default");
+		Object compositeKey2 = ctor.newInstance("v1/order", "default");
+		Object compositeKey3 = ctor.newInstance("v1/order", "default");
 		assertTrue(compositeKey1.equals(compositeKey2));
 		assertTrue(compositeKey2.equals(compositeKey3));
 		assertTrue(compositeKey1.equals(compositeKey3));
@@ -330,51 +339,61 @@ public class RestServiceImplTest extends BaseContextMockTest {
 	
 	/**
 	 * @verifies return false if given null
-	 * @see CompositeSearchHandlerKey#equals(Object)
+	 * @see RestServiceImpl.CompositeSearchHandlerKey#equals(Object)
 	 */
 	@Test
 	public void equals_shouldReturnFalseIfGivenNull() throws Exception {
-		RestServiceImpl.CompositeSearchHandlerKey compositeKey1 = new RestServiceImpl.CompositeSearchHandlerKey("v1/order",
-		        "default");
+		Class compositeSearchHandlerClass = Class
+		        .forName("org.openmrs.module.webservices.rest.web.api.impl.RestServiceImpl$CompositeSearchHandlerKey");
+		Constructor ctor = compositeSearchHandlerClass.getDeclaredConstructors()[0];
+		
+		Object compositeKey1 = ctor.newInstance("v1/order", "default");
 		assertFalse(compositeKey1.equals(null));
 	}
 	
 	/**
 	 * @verifies return false if given a composite key with different supported resource
-	 * @see CompositeSearchHandlerKey#equals(Object)
+	 * @see RestServiceImpl.CompositeSearchHandlerKey#equals(Object)
 	 */
 	@Test
 	public void equals_shouldReturnFalseIfGivenACompositeKeyWithDifferentSupportedResource() throws Exception {
-		RestServiceImpl.CompositeSearchHandlerKey compositeKey1 = new RestServiceImpl.CompositeSearchHandlerKey("v1/order",
-		        "default");
-		RestServiceImpl.CompositeSearchHandlerKey compositeKey2 = new RestServiceImpl.CompositeSearchHandlerKey("v2/order",
-		        "default");
+		Class compositeSearchHandlerClass = Class
+		        .forName("org.openmrs.module.webservices.rest.web.api.impl.RestServiceImpl$CompositeSearchHandlerKey");
+		Constructor ctor = compositeSearchHandlerClass.getDeclaredConstructors()[0];
+		
+		Object compositeKey1 = ctor.newInstance("v1/order", "default");
+		Object compositeKey2 = ctor.newInstance("v2/order", "default");
 		assertFalse(compositeKey1.equals(compositeKey2));
 		assertFalse(compositeKey2.equals(compositeKey1));
 	}
 	
 	/**
 	 * @verifies return false if given a composite key with different additional key
-	 * @see CompositeSearchHandlerKey#equals(Object)
+	 * @see RestServiceImpl.CompositeSearchHandlerKey#equals(Object)
 	 */
 	@Test
 	public void equals_shouldReturnFalseIfGivenACompositeKeyWithDifferentAdditionalKey() throws Exception {
-		RestServiceImpl.CompositeSearchHandlerKey compositeKey1 = new RestServiceImpl.CompositeSearchHandlerKey("v1/order",
-		        "default");
-		RestServiceImpl.CompositeSearchHandlerKey compositeKey2 = new RestServiceImpl.CompositeSearchHandlerKey("v1/order",
-		        "custom");
+		Class compositeSearchHandlerClass = Class
+		        .forName("org.openmrs.module.webservices.rest.web.api.impl.RestServiceImpl$CompositeSearchHandlerKey");
+		Constructor ctor = compositeSearchHandlerClass.getDeclaredConstructors()[0];
+		
+		Object compositeKey1 = ctor.newInstance("v1/order", "default");
+		Object compositeKey2 = ctor.newInstance("v2/order", "custom");
 		assertFalse(compositeKey1.equals(compositeKey2));
 		assertFalse(compositeKey2.equals(compositeKey1));
 	}
 	
 	/**
 	 * @verifies return false if given an object which is not an instanceof this class
-	 * @see CompositeSearchHandlerKey#equals(Object)
+	 * @see RestServiceImpl.CompositeSearchHandlerKey#equals(Object)
 	 */
 	@Test
 	public void equals_shouldReturnFalseIfGivenAnObjectWhichIsNotAnInstanceofThisClass() throws Exception {
-		RestServiceImpl.CompositeSearchHandlerKey compositeKey1 = new RestServiceImpl.CompositeSearchHandlerKey("v1/order",
-		        "default");
+		Class compositeSearchHandlerClass = Class
+		        .forName("org.openmrs.module.webservices.rest.web.api.impl.RestServiceImpl$CompositeSearchHandlerKey");
+		Constructor ctor = compositeSearchHandlerClass.getDeclaredConstructors()[0];
+		
+		Object compositeKey1 = ctor.newInstance("v1/order", "default");
 		assertFalse(compositeKey1.equals("otherClass"));
 	}
 }

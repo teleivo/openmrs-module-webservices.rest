@@ -83,7 +83,10 @@ public class RestServiceImpl implements RestService {
 		
 	}
 	
-	public static class CompositeSearchHandlerKey {
+	/**
+	 * Wraps {@code Resource} name and an additional string-based key into a composite key.
+	 */
+	private static class CompositeSearchHandlerKey {
 		
 		final public String supportedResource;
 		
