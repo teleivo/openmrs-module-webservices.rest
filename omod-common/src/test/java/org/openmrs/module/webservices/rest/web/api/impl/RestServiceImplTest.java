@@ -428,4 +428,23 @@ public class RestServiceImplTest extends BaseContextMockTest {
 		assertFalse(compositeKey1.equals(compositeKey2));
 		assertFalse(compositeKey2.equals(compositeKey1));
 	}
+
+	@Test
+	public void testme() {
+		SearchHandler firstSearchHandler = mock(SearchHandler.class);
+		SearchConfig firstSearchConfig = new SearchConfig("default", "v1/order", "1.8.*", new SearchQuery.Builder("Fuzzy search")
+				.withRequiredParameters("q").build());
+		when(firstSearchHandler.getSearchConfig()).thenReturn(firstSearchConfig);
+
+		SearchHandler secondSearchHandler = mock(SearchHandler.class);
+		SearchConfig secondSearchConfig = new SearchConfig("default", null, "1.8.*", new SearchQuery.Builder("Fuzzy search")
+				.withRequiredParameters("q").build());
+		when(secondSearchHandler.getSearchConfig()).thenReturn(secondSearchConfig);
+
+		when(restHelperService.getRegisteredSearchHandlers()).thenReturn(Arrays.asList(firstSearchHandler, secondSearchHandler));
+
+		expectedException.expect(InvalidSearchException.class);
+		expectedException.expectMessage("The resource name for search config should not be null");
+		restService.getResourceByName("v1/order");
+	}
 }
