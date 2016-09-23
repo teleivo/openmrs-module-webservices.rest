@@ -32,30 +32,20 @@ public class OpenmrsClassScanner {
 	
 	protected final Log log = LogFactory.getLog(getClass());
 	
-	private static final OpenmrsClassScanner instance = new OpenmrsClassScanner();
-	
 	private final MetadataReaderFactory metadataReaderFactory;
 	
 	private final ResourcePatternResolver resourceResolver;
-	
-	OpenmrsClassScanner() {
-		
-		this.metadataReaderFactory = new SimpleMetadataReaderFactory(OpenmrsClassLoader.getInstance());
-		
-		this.resourceResolver = new PathMatchingResourcePatternResolver(OpenmrsClassLoader.getInstance());
-		
+
+	OpenmrsClassScanner(MetadataReaderFactory metadataReaderFactory, ResourcePatternResolver resourcePatternResolver) {
+		this.metadataReaderFactory = metadataReaderFactory;
+		this.resourceResolver = resourcePatternResolver;
 	}
-	
-	/**
-	 * @return the instance
-	 */
-	
-	public static OpenmrsClassScanner getInstance() {
-		
-		return instance;
-		
-	}
-	
+
+//		this.metadataReaderFactory = new SimpleMetadataReaderFactory(OpenmrsClassLoader.getInstance());
+//
+//		this.resourceResolver = new PathMatchingResourcePatternResolver(OpenmrsClassLoader.getInstance());
+
+
 	/**
 	 * Searches for classes extending or implementing the given type.
 	 * 
@@ -64,6 +54,9 @@ public class OpenmrsClassScanner {
 	 * @param concrete true if only concrete classes should be returned
 	 * @return the list of found classes
 	 * @throws IOException
+	 * @should return classes if given existing type and concrete true
+	 * @should return non concrete classes if given existing type and concrete false
+	 * @should return empty list if given type cannot be found on the classpath
 	 */
 	
 	public <T> List<Class<? extends T>> getClasses(Class<? extends T> type, boolean concrete) throws IOException {
@@ -94,7 +87,7 @@ public class OpenmrsClassScanner {
 							Class<? extends T> metadata = (Class<? extends T>) OpenmrsClassLoader.getInstance().loadClass(
 							
 							classname);
-							
+							System.out.println("shere");
 							types.add(metadata);
 							
 						}

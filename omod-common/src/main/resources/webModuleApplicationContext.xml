@@ -10,6 +10,27 @@
   		    http://www.springframework.org/schema/context
   		    http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
+	<bean id="openmrsClassScanner"
+		  class="org.openmrs.module.webservices.rest.web.OpenmrsClassScanner">
+		<property name="metadataReaderFactory">
+			<ref bean="metadataReaderFactory" />
+		</property>
+		<property name="resourceResolver">
+			<ref bean="resourceResolver" />
+		</property>
+	</bean>
+
+	<bean id="metadataReaderFactory"
+		  class="org.springframework.core.type.classreading.SimpleMetadataReaderFactory">
+		<constructor-arg
+	</bean>
+
+	<bean id="propsFromSystem"
+		class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="targetClass" value="org.openmrs.util.OpenmrsClassLoader" />
+		<property name="targetMethod" value="getInstance" />
+	</bean>
+
 	<bean id="restService"
 		class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager">
